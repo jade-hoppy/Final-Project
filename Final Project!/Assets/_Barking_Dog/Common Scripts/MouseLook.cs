@@ -84,15 +84,7 @@ public class MouseLook : MonoBehaviour
 		
 		transform.localRotation *= targetOrientation;
 		
-		// If there's a character body that acts as a parent to the camera
-		if (characterBody) {
-			var yRotation = Quaternion.AngleAxis (_mouseAbsolute.x, characterBody.transform.up);
-			characterBody.transform.localRotation = yRotation;
-			characterBody.transform.localRotation *= targetCharacterOrientation;
-		} else {
-			var yRotation = Quaternion.AngleAxis (_mouseAbsolute.x, transform.InverseTransformDirection (Vector3.up));
-			transform.localRotation *= yRotation;
-		}
+		
 	}
 
 	void FixedUpdate(){
