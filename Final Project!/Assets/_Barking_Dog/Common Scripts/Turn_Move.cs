@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Turn_Move : MonoBehaviour {
+public class Turn_Move : MonoBehaviour 
+{
 	public int TurnX;
 	public int TurnY;
 	public int TurnZ;
@@ -13,17 +14,42 @@ public class Turn_Move : MonoBehaviour {
 
 	public bool World;
 
+	public CharacterController controller;
+	 public float speed = 12f;
+	 public float gravity = 9.8f;
+
+	 Vector3 velocity;
+
 	// Use this for initialization
-	void Start () {
+	void Start () 
+	{
 		
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		if (World == true) {
+	void Update () 
+	{
+		float x = Input.GetAxis("Horizontal");
+		float z = Input.GetAxis("Vertical");
+		
+		Vector3 move = transform.right * x + transform.forward * z;
+
+		controller.Move(move * speed * Time.deltaTime);
+
+		velocity.y += gravity * Time.deltaTime;
+
+		controller.Move(velocity * Time.deltaTime);
+
+
+
+
+		if (World == true)
+		{
 			transform.Rotate(TurnX * Time.deltaTime,TurnY * Time.deltaTime,TurnZ * Time.deltaTime, Space.World);
 			transform.Translate(MoveX * Time.deltaTime, MoveY * Time.deltaTime, MoveZ * Time.deltaTime, Space.World);
-		}else{
+		}
+		else
+		{
 			transform.Rotate(TurnX * Time.deltaTime,TurnY * Time.deltaTime,TurnZ * Time.deltaTime, Space.Self);
 			transform.Translate(MoveX * Time.deltaTime, MoveY * Time.deltaTime, MoveZ * Time.deltaTime, Space.Self);
 		}
