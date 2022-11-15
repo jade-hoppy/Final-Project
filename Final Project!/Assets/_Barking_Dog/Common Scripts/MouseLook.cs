@@ -16,8 +16,8 @@ public class MouseLook : MonoBehaviour
 	//public bool lockCursor;
 	public CursorLockMode lockCursor;
 	
-	public Vector2 sensitivity = new Vector2 (2, 2);
-	public Vector2 smoothing = new Vector2 (3, 3);
+	public Vector2 sensitivity = new Vector2 (10, 10);
+	public Vector2 smoothing = new Vector2 (10, 10);
 	public Vector2 targetDirection;
 	public Vector2 targetCharacterDirection;
 	
@@ -29,7 +29,7 @@ public class MouseLook : MonoBehaviour
 	[Header ("Camera Move Settings :")]
 	
 	public float acceleration = 1.0f;
-	public float maxSpeed = 5;
+	public float maxSpeed = 10;
 	public float dampingSpeed = 0.2f;
 	
 	public KeyCode fwdKey = KeyCode.W;
