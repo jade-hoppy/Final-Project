@@ -16,9 +16,7 @@ public class Turn_Move : MonoBehaviour
 
 	public CharacterController controller;
 	 public float speed = 12f;
-	 public float gravity = 9.8f;
-
-	 Vector3 velocity;
+	
 
 	// Use this for initialization
 	void Start () 
@@ -36,9 +34,9 @@ public class Turn_Move : MonoBehaviour
 
 		controller.Move(move * speed * Time.deltaTime);
 
-		velocity.y += gravity * Time.deltaTime;
+		
 
-		controller.Move(velocity * Time.deltaTime);
+		
 
 
 

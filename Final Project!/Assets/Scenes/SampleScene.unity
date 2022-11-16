@@ -446,7 +446,6 @@ MonoBehaviour:
   World: 0
   controller: {fileID: 90691617}
   speed: 12
-  gravity: 9.8
 --- !u!95 &90691615
 Animator:
   serializedVersion: 4
@@ -2266,20 +2265,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 419e976ce3354ca4895c43e78bbd4dec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clampInDegrees: {x: 360, y: 180}
-  lockCursor: 0
-  sensitivity: {x: 2, y: 2}
-  smoothing: {x: 3, y: 3}
-  targetDirection: {x: 0, y: 0}
-  targetCharacterDirection: {x: 0, y: 0}
-  characterBody: {fileID: 62353419}
   acceleration: 0.5
-  maxSpeed: 5
-  dampingSpeed: 0.2
+  speedX: 0
+  speedZ: 0
   fwdKey: 119
   leftKey: 97
   backKey: 115
   rightKey: 100
+  lockCursor: 0
+  sensitivity: {x: 2, y: 2}
+  smoothing: {x: 3, y: 3}
 --- !u!1 &992926613
 GameObject:
   m_ObjectHideFlags: 0
