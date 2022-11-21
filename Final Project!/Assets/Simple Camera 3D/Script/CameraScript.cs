@@ -79,7 +79,7 @@ public class CameraScript : MonoBehaviour
             Is1stPerson = false;
         }
 
-        //Locks Cursor if LockCursor and LockCursorLive bool is true
+        //fixes cursor
         if (IsLockCursor && LockCursorLive)
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -88,7 +88,7 @@ public class CameraScript : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
         }
 
-        //Runs 1st or 3rd person depending on your settings
+        //first person pov
         if(IsActive && Is1stPerson)
         {
             FirstPerson();
