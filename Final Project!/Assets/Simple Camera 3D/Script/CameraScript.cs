@@ -1,203 +1,90 @@
-﻿using UnityEngine;
+﻿﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+//automatically add a component to the inspector area of the
+//FPSPlayerObject
+[RequireComponent(typeof(CharacterController))]
 
 public class CameraScript : MonoBehaviour
 {
-    //float pool
-    [HideInInspector] public float MinSensitivity = 0;
-    [HideInInspector] public float Sensitivity = 90;
-    [HideInInspector] public float MaxSensitivity = 200;
-    [HideInInspector] public float StartLookY = 0.0f;
-    [HideInInspector] public float StartLookZ = 0.0f;
-    [HideInInspector] public float MaxY = 90f;
-    [HideInInspector] public float MinY = -90f;
-    //bool pool
-    [HideInInspector] public bool Is1stPerson;
-    [HideInInspector] public bool IsActive;
-    [HideInInspector] public bool IsLockCursor;
-    [HideInInspector] public bool DebugMode;
-    [HideInInspector] public bool LockCursorLive;
-    [HideInInspector] public bool Is3rdPerson;
-    [HideInInspector] public bool RoundFloats;
-    //list pool
-    [HideInInspector] public int listIndx = 0;
-    [HideInInspector] public string[] Lists = new string[] { "1st Person", "3rd Person" };
-    //gameobject pool
-    [HideInInspector] public GameObject GameObject3d;
-    [HideInInspector] public GameObject Player;
-    [HideInInspector] public GameObject PlayerPlayer;
+    //allows you to customize the movements of the player
+    public float walkingSpeed = 7.5f;
+    public float runningSpeed = 11.5f;
+    public float jumpSpeed = 8.0f;
+    public float gravity = 20.0f;
+    public Camera playerCamera;
+    public float lookSpeed = 2.0f;
+    public float lookXLimit = 45.0f;
+
+    CharacterController characterController;
+    Vector3 moveDirection = Vector3.zero;
+    float rotationX = 0;
 
 
+    //adds a public variable but you can't see or modify it
+    //in Unity inspector
+    [HideInInspector]
+    public bool canMove = true;
 
-    //private pool
-    private float xRotation = 0.0f;
-    //private pool
-
-    //Start//
-
-    void Start()
+    void Start()//runs once at the start of the game
     {
-        //Changes between 1st or 3rd person view
-        if(listIndx == 0)
-        {
-            Is1stPerson = true;
-            Is3rdPerson = false;
-        } else if (listIndx == 1)
-        {
-            Is3rdPerson = true;
-            Is1stPerson = false;
-        }
-        
-        //Locks Cursor if LockCursor bool is active (On start)
-        if(IsLockCursor)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-        
-        //Finds parent of Camera
-        Player = transform.parent.gameObject;
+        //get access to the controller so we can manipulate it.
+        characterController = GetComponent<CharacterController>();
 
-        //Finds parent of parent if 3rd Person
-        if (Is3rdPerson)
-        {
-            PlayerPlayer = Player.transform.parent.gameObject;
-        }
+        // Lock cursor in gameview window so you won't lose control
+        //of your player if the cursor leaves the bounds of the gameview
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        //press "Escape" when playing the game to access the cursor again
+
     }
 
-    //Update//
-
-    void LateUpdate()
+    void Update()
     {
-        //Changes between 1st or 3rd person view live
-        if (listIndx == 0)
-        {
-            Is1stPerson = true;
-            Is3rdPerson = false;
-        }
-        else if (listIndx == 1)
-        {
-            Is3rdPerson = true;
-            Is1stPerson = false;
-        }
+        // We are grounded, so recalculate move direction based on axes
 
-        //fixes cursor
-        if (IsLockCursor && LockCursorLive)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-        } else if (IsLockCursor == false && LockCursorLive)
-        {
-            Cursor.lockState = CursorLockMode.None;
-        }
+        //this makes it so when you press up/down to move forward/backward, the camera
+        //and the player movements will all be oriented correctly
+        Vector3 forward = transform.TransformDirection(Vector3.forward);
+        Vector3 right = transform.TransformDirection(Vector3.right);
+        // Press Left Shift to run
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
+        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
+        float movementDirectionY = moveDirection.y;
+        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        //first person pov
-        if(IsActive && Is1stPerson)
+        //allow the player to jump
+        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
         {
-            FirstPerson();
-        } else if (IsActive && Is3rdPerson)
+            moveDirection.y = jumpSpeed;//jump in the air with "Jump" button
+        }
+        else
         {
-            ThirdPerson();
+            //fall back to ground when not on the ground
+            moveDirection.y = movementDirectionY;
         }
 
-        //Rounds floats if bool is true
-        if(RoundFloats)
+        // Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
+        // when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
+        // as an acceleration (ms^-2)
+        if (!characterController.isGrounded)
         {
-            Sensitivity = Mathf.RoundToInt(Sensitivity);
-            MinSensitivity = Mathf.RoundToInt(MinSensitivity);
-            MaxSensitivity = Mathf.RoundToInt(MaxSensitivity);
-            StartLookY = Mathf.RoundToInt(StartLookY);
-            StartLookZ = Mathf.RoundToInt(StartLookZ);
+            moveDirection.y -= gravity * Time.deltaTime;
         }
-    }
 
-    //1st Person//
-    
-    public void FirstPerson()
-    {
-        //If the 1st person bool and is active bool is active, the 1st person script will play
+        // Move the controller
+        characterController.Move(moveDirection * Time.deltaTime);
 
-        //Getting the mouse input values
-        float mouseX = Input.GetAxis("Mouse X") * Sensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * Sensitivity * Time.deltaTime;
-
-        //Limiting the camera's Y rotation
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, MinY, MaxY);
-
-        //Starting camera rotation
-        transform.localRotation = Quaternion.Euler(xRotation, StartLookY, StartLookZ);
-
-        //Change camera rotation based on mouse input values
-        Player.transform.Rotate(Vector3.up * mouseX);
-    }
-
-    //Third Person//
-
-    public void ThirdPerson()
-    {
-        //Getting the mouse input values
-        float mouseX = Input.GetAxis("Mouse X") * Sensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * Sensitivity * Time.deltaTime;
-
-        //Limiting the camera's Y rotation
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, MinY, MaxY);
-
-        //Starting camera rotation
-        Player.transform.localRotation = Quaternion.Euler(xRotation, StartLookY, StartLookZ);
-
-        //Change camera rotation based on mouse input values
-        PlayerPlayer.transform.Rotate(Vector3.up * mouseX);
-
-        transform.LookAt(Player.transform.position);
-    }
-
-
-    //Editor Commands//
-
-    //Editor Trigger
-    public void Reset()
-    {
-        Debug.Log("Settings Reset");
-        Is1stPerson = true;
-        RoundFloats = true;
-        IsActive = true;
-        IsLockCursor = true;
-        LockCursorLive = true;
-        Is3rdPerson = false;
-        DebugMode = false;
-        Sensitivity = 90f;
-        MinSensitivity = 0f;
-        MaxSensitivity = 200f;
-        StartLookY = 0.0f;
-        StartLookZ = 0.0f;
-        MaxY = 90f;
-        MinY = -90f;
-        listIndx = 0;
-    }
-
-
-    //Editor Trigger
-    public void NotOptimized()
-    {
-        Debug.Log("Not Optimized");
-        RoundFloats = true;
-        LockCursorLive = true;
-    }
-
-
-    //Editor Trigger
-    public void ModeratelyOptimized()
-    {
-        Debug.Log("Moderately Optimized");
-        RoundFloats = true;
-        LockCursorLive = false;
-    }
-
-
-    //Editor Trigger
-    public void ExtremelyOptimized()
-    {
-        Debug.Log("Extremely Optimized");
-        RoundFloats = false;
-        LockCursorLive = false;
+        // Player and Camera rotation so you can always see where you are going
+        if (canMove)
+        {
+            rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
+            rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
+            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
+            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
+        }
     }
 }
